@@ -139,6 +139,7 @@ def getGroups(classes):
 
 
 def evaluateAccuracy(record, config):
+    print("eval" + str(record) )
     f = open(config.detectionFile)
     lines = f.readlines()
     ln = int(config.count / 10)
@@ -183,53 +184,6 @@ def evaluateAccuracy(record, config):
 
     print("TP:", TP, " FP:", FP, " FN:", FN, " precission:", precision, " recall", recall, " f1:", config.f1)
 
-def evaluateAccuracy(record, config):
-    if (config.videoFile == '../frame_extractor/highway.mp4'):
-        f = open("./highway.csv")
-        lines = f.readlines()
-        ln = int(config.count / 10)
-        print(ln)
-        print(lines[ln])
-        r2 = decode(lines[ln])
-        TP = 0
-        FP = 0
-        FN = 0
-        for detectedClass in record["predication"]:
-            classIsTruePositiv = False
-            for referenceClasses in r2["predication"]:
-                if referenceClasses["class"] == detectedClass["class"]:
-                    classIsTruePositiv = True
-                    break
-
-            if classIsTruePositiv:
-                TP = TP + 1
-            else:
-                FP = FP + 1
-
-        for referenceClasses in r2["predication"]:
-            classIsTruePositiv = False
-            for detectedClass in record["predication"]:
-                if referenceClasses["class"] == detectedClass["class"]:
-                    classIsTruePositiv = True
-                    break
-            if classIsTruePositiv == False:
-                FN = FN + 1
-        print("TP:", TP, " FP:", FP, " FN:", FN)
-
-        if TP == 0 and ( FP == 0 or FN == 0):
-            config.f2 = 1
-            return
-
-        precision = TP / (TP + FP)
-        recall = TP / (TP + FN)
-        if recall+precision == 0:
-            config.f1 = 0
-        else:
-            config.f1 = 2*(recall * precision) / (recall + precision)
-
-        print("TP:", TP, " FP:", FP, " FN:", FN, " precission:", precision, " recall", recall, " f1:", config.f1)
-
-
 
 def jpegDetection(config, jpegCompressionFactor):
     imagePath = "./input.png"
@@ -256,6 +210,7 @@ def jpegDetection(config, jpegCompressionFactor):
     config.edgeFileSize = pngSize / jpegSize
     result = sp.Popen(edgeComand, shell=True, stdout=sp.PIPE)
     result.wait()
+    print("Bla " )
     for line in result.stdout:
         l = line.rstrip()
         r = decode(str(l.decode("utf-8")))

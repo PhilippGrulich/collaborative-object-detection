@@ -1,0 +1,14 @@
+
+
+venv
+results
+__pycache*
+data
+*.pyc
+*.idea
+diff.png
+compress_img1.jpg
+compressed
+input.png
+predictions.png
+raw.png

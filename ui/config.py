@@ -51,10 +51,10 @@ class Config:
 
         videoText = str(self.videoSelectionComboBox.currentText())
         if videoText == "Highway":
-            self.videoFile = '../frame_extractor/highway.mp4'
+            self.videoFile = '../video/highway.mp4'
             self.detectionFile = "highway.csv"
         elif videoText == "Berlin Street":
-            self.videoFile = 'Berlin Street.mp4'
+            self.videoFile = '../video/Berlin Street.mp4'
             self.detectionFile = "berlin.csv"
 
         if(self.edgeLayer is not None and self.cloudLayer is not  None):
@@ -95,9 +95,9 @@ class Config:
         if self.resultText != None:
             self.resultText.clear()
             self.resultText.insertPlainText(self.text)
-            if self.compressionCheckbox.checkState():
-                self.jpgCompressionCombobox.setEnabled(True)
-            self.splittingCheckbox.setCheckable(False)
+          #  if self.compressionCheckbox.checkState():
+           #     self.jpgCompressionCombobox.setEnabled(True)
+           # self.splittingCheckbox.setCheckable(False)
             #self.splittingCheckbox.setCheckable(False)
 
 
