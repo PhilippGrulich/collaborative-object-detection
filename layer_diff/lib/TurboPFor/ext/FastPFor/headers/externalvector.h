@@ -221,7 +221,7 @@ public:
     // we must merge which requires a new file
     FILE *newfd = ::tmpfile();
     if (newfd == NULL) {
-      throw std::runtime_error("could not open temp file");
+      throw std::runtime_error("could not open data file");
     }
 
     DataType container;
@@ -290,8 +290,8 @@ public:
       std::cout << "opening..." << std::endl;
     fd = tmpfile();
     if (fd == NULL) {
-      std::cerr << "Can't create a temp file" << std::endl;
-      throw std::runtime_error("could not open temp file");
+      std::cerr << "Can't create a data file" << std::endl;
+      throw std::runtime_error("could not open data file");
     }
   }
 

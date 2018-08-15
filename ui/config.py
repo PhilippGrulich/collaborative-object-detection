@@ -15,6 +15,7 @@ import imagedetector
 
 class Config:
     play = False
+    thresholdCombobox = None
     networkSelectionComboBox = None
     videoSelectionComboBox = None
     compressionCheckbox = None
@@ -65,29 +66,49 @@ class Config:
         self.jpgCompressionCombobox.setEnabled(False)
         self.splittingLayerComboBox.setEnabled(False)
         self.vectorCompressionCombobox.setEnabled(False)
+        self.thresholdCombobox.setEnabled(False)
+
         self.compressionCheckbox.setEnabled(True)
         self.compressionCheckbox.setCheckable(True)
+
+        self.splittingCheckbox.setEnabled(True)
+        self.splittingCheckbox.setCheckable(True)
+
+        self.diffCheckbox.setEnabled(True)
+        self.diffCheckbox.setCheckable(True)
 
 
         #self.splittingCheckbox.setCheckable(False)
 
         if self.processOnEdgeBtn != None:
-            self.splittingCheckbox.setEnabled(True)
             if self.processOnEdgeBtn.isChecked():
-                self.splittingCheckbox.setCheckable(True)
                 if self.splittingCheckbox.checkState():
                     self.splittingLayerComboBox.setEnabled(True)
+
                     if self.compressionCheckbox.checkState():
                         self.vectorCompressionCombobox.setEnabled(True)
+                        if self.diffCheckbox.checkState():
+                            self.thresholdCombobox.setEnabled(True)
+                    else:
+                        self.diffCheckbox.setEnabled(False)
+                        self.diffCheckbox.setCheckable(False)
+                else:
+                    self.compressionCheckbox.setEnabled(False)
+                    self.compressionCheckbox.setCheckable(False)
+                    self.diffCheckbox.setEnabled(False)
+                    self.diffCheckbox.setCheckable(False)
             else:
+                self.splittingCheckbox.setEnabled(False)
+                self.splittingCheckbox.setCheckable(False)
                 if self.diffCheckbox.checkState():
                     self.jpgCompressionCombobox.setEnabled(False)
                     self.compressionCheckbox.setEnabled(False)
                     self.compressionCheckbox.setCheckable(False)
                 elif self.compressionCheckbox.checkState():
                     self.jpgCompressionCombobox.setEnabled(True)
-                self.splittingCheckbox.setCheckable(False)
-                self.splittingCheckbox.setEnabled(False)
+                    self.diffCheckbox.setEnabled(False)
+                    self.diffCheckbox.setCheckable(False)
+
                 #self.splittingCheckbox.setCheckable(False)
 
     def updateImage(self):

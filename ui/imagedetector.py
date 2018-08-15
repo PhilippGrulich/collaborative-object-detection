@@ -1,10 +1,9 @@
 import os
 import subprocess as sp
 import time
-
+from shutil import copyfile
 import cv2
 from demjson import decode
-
 
 import diffImage
 
@@ -13,7 +12,6 @@ cloudPath = "/../nn_splitting/cloud/"
 
 
 def detect(config):
-
     print("start")
 
     if config.processOnEdgeBtn.isChecked():
@@ -21,7 +19,10 @@ def detect(config):
         if config.splittingCheckbox.checkState():
             """Splitting"""
             splittingLayer = str(config.splittingLayerComboBox.currentText())
-            if config.compressionCheckbox.checkState():
+            if config.diffCheckbox.checkState():
+                splittingDetection(int(splittingLayer), config, True,
+                                   str(config.vectorCompressionCombobox.currentText()), True)
+            elif config.compressionCheckbox.checkState():
                 splittingDetection(int(splittingLayer), config, True,
                                    str(config.vectorCompressionCombobox.currentText()))
             else:
@@ -81,7 +82,6 @@ def diffCloudDetection(config):
         setResultText(r, config)
 
 
-
 def cloudDetection(config):
     imagePath = "./input.png"
 
@@ -112,9 +112,9 @@ def cloudDetection(config):
         else:
             config.edgeLatency = 0
 
+
 def evaluateTime(record, config):
     config.edgeLatency = record["time"]
-
 
 
 def setResultText(record, config):
@@ -139,7 +139,7 @@ def getGroups(classes):
 
 
 def evaluateAccuracy(record, config):
-    print("eval" + str(record) )
+    print("eval" + str(record))
     f = open(config.detectionFile)
     lines = f.readlines()
     ln = int(config.count / 10)
@@ -210,7 +210,7 @@ def jpegDetection(config, jpegCompressionFactor):
     config.edgeFileSize = pngSize / jpegSize
     result = sp.Popen(edgeComand, shell=True, stdout=sp.PIPE)
     result.wait()
-    print("Bla " )
+    print("Bla ")
     for line in result.stdout:
         l = line.rstrip()
         r = decode(str(l.decode("utf-8")))
@@ -218,21 +218,21 @@ def jpegDetection(config, jpegCompressionFactor):
         setResultText(r, config)
 
 
-def splittingDetection(splittingLayer, config, compress=False, compressionBit="0"):
+def splittingDetection(splittingLayer, config, compress=False, compressionBit="0", diff=False):
     imagePath = "./input.png"
+    edgePartitionLocation = "./data/edgePartition"
     """
        Edge detection
        """
 
-    if os.path.isfile("./data/edgePartition"):
-        os.remove("./data/edgePartition")
+    if os.path.isfile(edgePartitionLocation):
+        os.remove(edgePartitionLocation)
 
     edgeComand = "." + edgePath + "bin/darknet detector part ." + edgePath + "bin/voc.names ." + edgePath + "bin/tiny-yolo-voc.cfg ." + edgePath + "../tiny-yolo-voc.weights " \
                                                                                                                                                    "-thresh 0.24 " + str(
         imagePath) + " 50 " + str(splittingLayer) + " "
     print(edgeComand)
 
-    start = time.time()
     result = sp.Popen(edgeComand, shell=True, stdout=sp.PIPE)
     result.wait()
     for line in result.stdout:
@@ -241,25 +241,45 @@ def splittingDetection(splittingLayer, config, compress=False, compressionBit="0
         r = decode(str(l.decode("utf-8")))
         evaluateTime(r, config)
 
-
-    if os.path.isfile("./data/edgePartition"):
-        edgeFileSize = os.path.getsize('./data/edgePartition')
+    if os.path.isfile(edgePartitionLocation):
+        edgeFileSize = os.path.getsize(edgePartitionLocation)
         inputFileSize = os.path.getsize(imagePath)
         config.edgeFileSize = inputFileSize / edgeFileSize
         config.setSizeField(edgeFileSize)
 
-    if compress == True:
-        edgeFileSize = os.path.getsize('./data/edgePartition')
-        compressComand = "." + edgePath + "3rdparty/zfp/bin/zfp -f -1 " + str(
-            edgeFileSize / 4) + " -i " + './data/edgePartition' + " -z compressed -p " + compressionBit + " -h"
-        print(compressComand)
+    if diff == True:
+        print("layer diff compression")
         start = time.time()
-        sp.Popen(compressComand, shell=True).wait()
-        config.edgeLatency = config.edgeLatency + time.time() - start
-        decompressComand = "." + edgePath + "3rdparty/zfp/bin/zfp -h -z " + 'compressed' + " -o ./data/edgePartition"
-        print(decompressComand)
-        sp.Popen(decompressComand, shell=True).wait()
-        edgeFileSize = os.path.getsize("compressed")
+        compressedFile = "./data/compressed"
+        if os.path.isfile("./data/edgePartition_old"):
+            zeroed = "./data/zeroed"
+            diffCompressEdge(edgePartitionLocation)
+            compressEdgePartition(compressionBit, zeroed, compressedFile)
+            config.edgeLatency = time.time() - start
+            decompressEdgePartition(compressedFile, zeroed)
+            diffDeompressEdge(zeroed)
+            copyfile(edgePartitionLocation, "./data/edgePartition_old")
+            copyfile(zeroed, edgePartitionLocation)
+
+        else:
+            compressEdgePartition(compressionBit, edgePartitionLocation, compressedFile)
+            config.edgeLatency = time.time() - start
+            decompressEdgePartition(compressedFile, edgePartitionLocation)
+            copyfile(edgePartitionLocation, "./data/edgePartition_old")
+
+        edgeFileSize = os.path.getsize(compressedFile)
+        config.setSizeField(edgeFileSize)
+
+        inputFileSize = os.path.getsize(imagePath)
+        config.edgeFileSize = inputFileSize / edgeFileSize
+
+    elif compress == True:
+        start = time.time()
+        compressedFile = "./data/compressed"
+        compressEdgePartition(compressionBit, edgePartitionLocation, compressedFile)
+        config.edgeLatency = time.time() - start
+        decompressEdgePartition(compressedFile, edgePartitionLocation)
+        edgeFileSize = os.path.getsize(compressedFile)
         config.setSizeField(edgeFileSize)
 
         inputFileSize = os.path.getsize(imagePath)
@@ -267,7 +287,7 @@ def splittingDetection(splittingLayer, config, compress=False, compressionBit="0
 
     cloudComand = "." + cloudPath + "bin/darknet detector test ." + cloudPath + "bin/voc.names ." + cloudPath + "bin/tiny-yolo-voc.cfg ." + cloudPath + "../tiny-yolo-voc.weights " \
                                                                                                                                                         "-thresh 0.24 " + str(
-        imagePath) + " ./data/edgePartition " + str(splittingLayer - 1) + " "
+        imagePath) + " " + edgePartitionLocation + " " + str(splittingLayer - 1) + " "
 
     print(cloudComand)
     result = sp.Popen(cloudComand, shell=True, stdout=sp.PIPE)
@@ -279,3 +299,30 @@ def splittingDetection(splittingLayer, config, compress=False, compressionBit="0
         evaluateAccuracy(r, config)
         setResultText(r, config)
 
+
+def decompressEdgePartition(inputFile, outputFile):
+    decompressComand = "." + edgePath + "3rdparty/zfp/bin/zfp -h -z " + inputFile + " -o " + outputFile
+    print(decompressComand)
+    sp.Popen(decompressComand, shell=True).wait()
+
+
+def compressEdgePartition(compressionBit, inputFile, resultFile):
+    edgeFileSize = os.path.getsize(inputFile)
+    compressComand = "." + edgePath + "3rdparty/zfp/bin/zfp -f -1 " + str(
+        edgeFileSize / 4) + " -i " + inputFile + " -z " + resultFile + " -p " + compressionBit + " -h"
+    print(compressComand)
+
+    sp.Popen(compressComand, shell=True).wait()
+
+def diffCompressEdge(inputFile):
+
+    edgeFileSize = os.path.getsize(inputFile)
+    compressComand = "./../layer_diff/layer_compress c "+ str(edgeFileSize / 4) + " " + "1"
+    print(compressComand)
+    sp.Popen(compressComand, shell=True).wait()
+
+def diffDeompressEdge(edgePartitionLocation):
+    edgeFileSize = os.path.getsize(edgePartitionLocation)
+    compressComand = "./../layer_diff/layer_compress d "+ str(edgeFileSize / 4)
+    print(compressComand)
+    sp.Popen(compressComand, shell=True).wait()

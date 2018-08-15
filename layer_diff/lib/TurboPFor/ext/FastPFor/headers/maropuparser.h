@@ -61,7 +61,7 @@ public:
     if (fd == NULL) {
       std::cerr << "IO status: " << strerror(errno) << std::endl;
       std::cerr << "Can't open " << mFilename << std::endl;
-      throw std::runtime_error("could not open temp file");
+      throw std::runtime_error("could not open data file");
     }
     setvbuf(fd, NULL, _IOFBF, 1024 * 4); // large buffer
   }

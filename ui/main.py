@@ -264,6 +264,23 @@ class Window(QWidget):
         vectorCompressionLayout.addWidget(vectorCompressionCombobox)
         parammeterLayout.addLayout(vectorCompressionLayout)
 
+
+
+        diffTresholdLayout = QHBoxLayout()
+        diffTresholdLayout.addWidget(QLabel("Differential Threshold:", self))
+        thresholdCombobox = QComboBox()
+        thresholdCombobox.activated.connect(config.updateSettings)
+        thresholdCombobox.addItem("0.00001")
+        thresholdCombobox.addItem("0.0001")
+        thresholdCombobox.addItem("0.001")
+        thresholdCombobox.addItem("0.01")
+        thresholdCombobox.addItem("0.1")
+
+        config.thresholdCombobox = thresholdCombobox
+        diffTresholdLayout.addWidget(thresholdCombobox)
+        parammeterLayout.addLayout(diffTresholdLayout)
+
+
         jpgCompressionLayout = QHBoxLayout()
         jpgCompressionLayout.addWidget(QLabel("JPG Compression:", self))
         jpgCompressionCombobox = QComboBox()
