@@ -52,7 +52,7 @@ def diffCloudDetection(config):
     if os.path.isfile("./data/edgePartition"):
         os.remove("./data/edgePartition")
 
-    edgeComand = "." + edgePath + "bin/darknet detector test ." + edgePath + "bin/voc.names ." + edgePath + "bin/tiny-yolo-voc.cfg ." + edgePath + "bin/tiny-yolo-voc.weights " \
+    edgeComand = "." + edgePath + "bin/darknet detector test ." + edgePath + "bin/voc.names ." + edgePath + "bin/tiny-yolo-voc.cfg ." + edgePath + "../tiny-yolo-voc.weights " \
                                                                                                                                                    "-thresh 0.24 " + str(
         imagePath) + " 50  -1"
     print(edgeComand)
@@ -88,7 +88,7 @@ def cloudDetection(config):
     if os.path.isfile("./data/edgePartition"):
         os.remove("./data/edgePartition")
 
-    edgeComand = "." + edgePath + "bin/darknet detector test ." + edgePath + "bin/voc.names ." + edgePath + "bin/tiny-yolo-voc.cfg ." + edgePath + "bin/tiny-yolo-voc.weights " \
+    edgeComand = "." + edgePath + "bin/darknet detector test ." + edgePath + "bin/voc.names ." + edgePath + "bin/tiny-yolo-voc.cfg ." + edgePath + "../tiny-yolo-voc.weights " \
                                                                                                                                                    "-thresh 0.24 " + str(
 
         imagePath) + " 50  -1"
@@ -200,7 +200,7 @@ def jpegDetection(config, jpegCompressionFactor):
 
     imagePath = './compress_img1.jpg'
 
-    edgeComand = "." + edgePath + "bin/darknet detector test ." + edgePath + "bin/voc.names ." + edgePath + "bin/tiny-yolo-voc.cfg ." + edgePath + "bin/tiny-yolo-voc.weights " \
+    edgeComand = "." + edgePath + "bin/darknet detector test ." + edgePath + "bin/voc.names ." + edgePath + "bin/tiny-yolo-voc.cfg ." + edgePath + "../tiny-yolo-voc.weights " \
                                                                                                                                                    "-thresh 0.24 " + str(
         imagePath) + " 50  -1"
     print(edgeComand)
@@ -227,7 +227,7 @@ def splittingDetection(splittingLayer, config, compress=False, compressionBit="0
     if os.path.isfile("./data/edgePartition"):
         os.remove("./data/edgePartition")
 
-    edgeComand = "." + edgePath + "bin/darknet detector part ." + edgePath + "bin/voc.names ." + edgePath + "bin/tiny-yolo-voc.cfg ." + edgePath + "bin/tiny-yolo-voc.weights " \
+    edgeComand = "." + edgePath + "bin/darknet detector part ." + edgePath + "bin/voc.names ." + edgePath + "bin/tiny-yolo-voc.cfg ." + edgePath + "../tiny-yolo-voc.weights " \
                                                                                                                                                    "-thresh 0.24 " + str(
         imagePath) + " 50 " + str(splittingLayer) + " "
     print(edgeComand)
@@ -265,7 +265,7 @@ def splittingDetection(splittingLayer, config, compress=False, compressionBit="0
         inputFileSize = os.path.getsize(imagePath)
         config.edgeFileSize = inputFileSize / edgeFileSize
 
-    cloudComand = "." + cloudPath + "bin/darknet detector test ." + cloudPath + "bin/voc.names ." + cloudPath + "bin/tiny-yolo-voc.cfg ." + cloudPath + "bin/tiny-yolo-voc.weights " \
+    cloudComand = "." + cloudPath + "bin/darknet detector test ." + cloudPath + "bin/voc.names ." + cloudPath + "bin/tiny-yolo-voc.cfg ." + cloudPath + "../tiny-yolo-voc.weights " \
                                                                                                                                                         "-thresh 0.24 " + str(
         imagePath) + " ./data/edgePartition " + str(splittingLayer - 1) + " "
 
