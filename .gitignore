@@ -1,0 +1,12 @@
+*/result/*
+__pyc*
+video/*
+
+ui/venv
+ui/results
+ui/__pycache*
+ui/data
+*.pyc
+*.idea
+
+*iml*

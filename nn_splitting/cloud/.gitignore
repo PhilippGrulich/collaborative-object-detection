@@ -1,0 +1,6 @@
+obj
+result
+*fpzip
+predictions.png
+darknet
+*.weights

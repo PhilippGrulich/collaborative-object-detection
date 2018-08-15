@@ -1,0 +1,5 @@
+*.a
+.idea/*
+obj/*
+cmake-build-debug/*
+CMakeFiles/*

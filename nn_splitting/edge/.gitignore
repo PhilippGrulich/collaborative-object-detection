@@ -1,0 +1,10 @@
+.ipynb_checkpoints
+cmake-build-debug/
+data
+obj
+result
+*fpzip
+predictions.png
+darknet
+*.weights
+
