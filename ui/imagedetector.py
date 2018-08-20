@@ -21,7 +21,7 @@ def detect(config):
             splittingLayer = str(config.splittingLayerComboBox.currentText())
             if config.diffCheckbox.checkState():
                 splittingDetection(int(splittingLayer), config, True,
-                                   str(config.vectorCompressionCombobox.currentText()), True)
+                                   str(config.vectorCompressionCombobox.currentText()), True, str(config.thresholdCombobox.currentText()))
             elif config.compressionCheckbox.checkState():
                 splittingDetection(int(splittingLayer), config, True,
                                    str(config.vectorCompressionCombobox.currentText()))
@@ -218,7 +218,63 @@ def jpegDetection(config, jpegCompressionFactor):
         setResultText(r, config)
 
 
-def splittingDetection(splittingLayer, config, compress=False, compressionBit="0", diff=False):
+def splittingDiff(splittingLayer, config, compress=False, compressionBit="0", diff=False, diffTrash = "0"):
+    zeroed = "./data/zeroed"
+    final = "./data/final"
+    start = time.time()
+    compressedFile = "./data/compressed"
+    imagePath = "./input.png"
+    edgePartitionLocation = "./data/edgePartition"
+    if os.path.isfile(zeroed):
+        os.remove(zeroed)
+
+    if os.path.isfile(final):
+        os.remove(final)
+
+
+
+    if os.path.isfile("./data/edgePartition_old"):
+        diffCompressEdge(edgePartitionLocation, diffTrash)
+        compressEdgePartition(compressionBit, zeroed, compressedFile)
+        config.edgeLatency = time.time() - start
+        decompressEdgePartition(compressedFile, zeroed)
+        diffDeompressEdge(zeroed)
+        copyfile(edgePartitionLocation, "./data/edgePartition_old")
+
+    else:
+        compressEdgePartition(compressionBit, edgePartitionLocation, compressedFile)
+        config.edgeLatency = time.time() - start
+        decompressEdgePartition(compressedFile, edgePartitionLocation)
+        copyfile(edgePartitionLocation, final)
+        copyfile(edgePartitionLocation, "./data/edgePartition_old")
+
+    edgeFileSize = os.path.getsize(compressedFile)
+    config.setSizeField(edgeFileSize)
+
+    inputFileSize = os.path.getsize(imagePath)
+    config.edgeFileSize = inputFileSize / edgeFileSize
+
+
+
+    inputFileSize = os.path.getsize(imagePath)
+    config.edgeFileSize = inputFileSize / edgeFileSize
+
+    cloudComand = "." + cloudPath + "bin/darknet detector test ." + cloudPath + "bin/voc.names ." + cloudPath + "bin/tiny-yolo-voc.cfg ." + cloudPath + "../tiny-yolo-voc.weights " \
+                                                                                                                                                        "-thresh 0.24 " + str(
+        imagePath) + " " + final + " " + str(splittingLayer - 1) + " "
+
+    print(cloudComand)
+    result = sp.Popen(cloudComand, shell=True, stdout=sp.PIPE)
+    result.wait()
+    for line in result.stdout:
+        l = line.rstrip()
+        r = decode(str(l.decode("utf-8")))
+        print("Line: " + str(r))
+        evaluateAccuracy(r, config)
+        setResultText(r, config)
+
+
+def createEdgePart(splittingLayer,config):
     imagePath = "./input.png"
     edgePartitionLocation = "./data/edgePartition"
     """
@@ -227,6 +283,7 @@ def splittingDetection(splittingLayer, config, compress=False, compressionBit="0
 
     if os.path.isfile(edgePartitionLocation):
         os.remove(edgePartitionLocation)
+
 
     edgeComand = "." + edgePath + "bin/darknet detector part ." + edgePath + "bin/voc.names ." + edgePath + "bin/tiny-yolo-voc.cfg ." + edgePath + "../tiny-yolo-voc.weights " \
                                                                                                                                                    "-thresh 0.24 " + str(
@@ -239,8 +296,13 @@ def splittingDetection(splittingLayer, config, compress=False, compressionBit="0
         l = line.rstrip()
         print(l)
         r = decode(str(l.decode("utf-8")))
-        evaluateTime(r, config)
+        #evaluateTime(r, config)
 
+
+def splittingDetection(splittingLayer, config, compress=False, compressionBit="0", diff=False, diffTrash = "0"):
+    imagePath = "./input.png"
+    edgePartitionLocation = "./data/edgePartition"
+    createEdgePart(splittingLayer,config)
     if os.path.isfile(edgePartitionLocation):
         edgeFileSize = os.path.getsize(edgePartitionLocation)
         inputFileSize = os.path.getsize(imagePath)
@@ -248,30 +310,7 @@ def splittingDetection(splittingLayer, config, compress=False, compressionBit="0
         config.setSizeField(edgeFileSize)
 
     if diff == True:
-        print("layer diff compression")
-        start = time.time()
-        compressedFile = "./data/compressed"
-        if os.path.isfile("./data/edgePartition_old"):
-            zeroed = "./data/zeroed"
-            diffCompressEdge(edgePartitionLocation)
-            compressEdgePartition(compressionBit, zeroed, compressedFile)
-            config.edgeLatency = time.time() - start
-            decompressEdgePartition(compressedFile, zeroed)
-            diffDeompressEdge(zeroed)
-            copyfile(edgePartitionLocation, "./data/edgePartition_old")
-            copyfile(zeroed, edgePartitionLocation)
-
-        else:
-            compressEdgePartition(compressionBit, edgePartitionLocation, compressedFile)
-            config.edgeLatency = time.time() - start
-            decompressEdgePartition(compressedFile, edgePartitionLocation)
-            copyfile(edgePartitionLocation, "./data/edgePartition_old")
-
-        edgeFileSize = os.path.getsize(compressedFile)
-        config.setSizeField(edgeFileSize)
-
-        inputFileSize = os.path.getsize(imagePath)
-        config.edgeFileSize = inputFileSize / edgeFileSize
+       return splittingDiff(splittingLayer,config,compress,compressionBit, diff,diffTrash)
 
     elif compress == True:
         start = time.time()
@@ -314,15 +353,15 @@ def compressEdgePartition(compressionBit, inputFile, resultFile):
 
     sp.Popen(compressComand, shell=True).wait()
 
-def diffCompressEdge(inputFile):
+def diffCompressEdge(inputFile, diffTrash):
 
     edgeFileSize = os.path.getsize(inputFile)
-    compressComand = "./../layer_diff/layer_compress c "+ str(edgeFileSize / 4) + " " + "1"
+    compressComand = "./../layer_diff/layer_compress c "+ str(edgeFileSize) + " " + str(diffTrash)
     print(compressComand)
     sp.Popen(compressComand, shell=True).wait()
 
 def diffDeompressEdge(edgePartitionLocation):
     edgeFileSize = os.path.getsize(edgePartitionLocation)
-    compressComand = "./../layer_diff/layer_compress d "+ str(edgeFileSize / 4)
+    compressComand = "./../layer_diff/layer_compress d "+ str(edgeFileSize)
     print(compressComand)
     sp.Popen(compressComand, shell=True).wait()

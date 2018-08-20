@@ -194,18 +194,18 @@ class Window(QWidget):
         videoSelectionLayout.addWidget(videoSelectionComboBox)
         videoLayout.addLayout(videoSelectionLayout)
 
-        networkelectionLayout = QHBoxLayout()
-        networkSelectionLabel = QLabel("Network Selection:", self)
+        #networkelectionLayout = QHBoxLayout()
+        #networkSelectionLabel = QLabel("Network Selection:", self)
 
-        networkSelectionComboBox = QComboBox()
-        networkSelectionComboBox.currentIndexChanged.connect(config.updateSettings)
-        config.networkSelectionComboBox = networkSelectionComboBox
-        networkSelectionComboBox.addItem("Tiny Yolo")
-        networkSelectionComboBox.addItem("Yolo")
-        networkelectionLayout.addWidget(networkSelectionLabel)
-        networkelectionLayout.addWidget(networkSelectionComboBox)
+        #networkSelectionComboBox = QComboBox()
+        #networkSelectionComboBox.currentIndexChanged.connect(config.updateSettings)
+        #config.networkSelectionComboBox = networkSelectionComboBox
+        #networkSelectionComboBox.addItem("Tiny Yolo")
+        #networkSelectionComboBox.addItem("Yolo")
+        #networkelectionLayout.addWidget(networkSelectionLabel)
+        #networkelectionLayout.addWidget(networkSelectionComboBox)
         # videoLayout.setLayout(networkelectionLayout)
-        videoLayout.addLayout(networkelectionLayout)
+        #videoLayout.addLayout(networkelectionLayout)
 
         topLayout.addLayout(videoLayout, 1, 0)
 
@@ -270,11 +270,15 @@ class Window(QWidget):
         diffTresholdLayout.addWidget(QLabel("Differential Threshold:", self))
         thresholdCombobox = QComboBox()
         thresholdCombobox.activated.connect(config.updateSettings)
-        thresholdCombobox.addItem("0.00001")
+        thresholdCombobox.addItem("0.00000")
+        thresholdCombobox.addItem("0.000001")
+        #thresholdCombobox.addItem("0.00001")
         thresholdCombobox.addItem("0.0001")
-        thresholdCombobox.addItem("0.001")
+        #thresholdCombobox.addItem("0.001")
         thresholdCombobox.addItem("0.01")
         thresholdCombobox.addItem("0.1")
+        thresholdCombobox.addItem("1")
+        thresholdCombobox.addItem("10")
 
         config.thresholdCombobox = thresholdCombobox
         diffTresholdLayout.addWidget(thresholdCombobox)
@@ -325,7 +329,7 @@ class Window(QWidget):
 
         acucracyTab = QWidget()
         accuracyLayout = QVBoxLayout()
-        config.accuracyChart  = PlotCanvas("Accuracy", "", width=5, height=4)
+        config.accuracyChart  = PlotCanvas("Accuracy", "accuracy", width=5, height=4)
         accuracyLayout.addWidget(config.accuracyChart)
         # config.compressionChart = chart
         # data = [(0, 8), (1, 9), (2, 9), (3, 10), (4, 9)]
