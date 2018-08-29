@@ -19,19 +19,19 @@ demonstration. We investigate the efficiency of these NN techniques, how they ca
 ## Demo Setup:
 
 ### Requirements:
-This project requires at least GCC 7.X, OpenCV 3.X and Python 3.X
+This project requires at least GCC 7.X, OpenCV 3.X, Python 3.X and PyQt
 
 ## Components:
 This project is seperated into multiple components, which have to be build individually. 
 
-#### Frame Extractor:
-This programme extracts frames from a given video file and saves then to an output folder as jpg.
-[Details](https://github.com/PhilippGrulich/collaborative-object-detection/tree/master/frame_extractor)
+#### Ui:
+The ui component represented basically our demo as described in the paper. It requires that all other components are built individually.
+Execut the main.py to start the demo.
 
 #### Difference Image:
-In this approach, we extract the difference between Frames and transfer only the part of the image which has changed in comparison to the last full transferred frame.
+In this component, we extract the difference between Frames and transfer only the part of the image which has changed in comparison to the last full transferred frame.
 To implement this we rely on a Gaussian Mixture-based Background/Foreground Segmentation Algorithm implemented in OpenCV to detect the changes partly in the image [“An improved adaptive background mixture model for real-time tracking with shadow detection" by P. KadewTraKuPong and R. Bowden].
-This algorithm generates a difference image, which we use to crop out the differences.
+This component expected a difference image, which we use to crop out the differences.
 [Details](https://github.com/PhilippGrulich/collaborative-object-detection/tree/master/differential_image)
 
 #### NN Slitting:
@@ -46,4 +46,4 @@ The cloud component read the file and completes the NN computation
 [Details](https://github.com/PhilippGrulich/Collaborative-Realtime-Object-Detection/tree/master/nn_splitting/cloud)
 
 - **Compression**:
-Compression is implemented with the library [zfp](http://zfp.readthedocs.io). For the batch, the component provides scripts for compression and decompression.
+Compression is implemented with the library [zfp](http://zfp.readthedocs.io). 
