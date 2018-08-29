@@ -53,12 +53,18 @@ class Config:
         videoText = str(self.videoSelectionComboBox.currentText())
         if videoText == "Highway":
             self.videoFile = '../video/highway.mp4'
-            self.detectionFile = "highway.csv"
+            self.detectionFile = "highway"
         elif videoText == "Berlin Street":
             self.videoFile = '../video/Berlin Street.mp4'
-            self.detectionFile = "berlin.csv"
+            self.detectionFile = "berlin"
 
-        if(self.edgeLayer is not None and self.cloudLayer is not  None):
+        if not self.processOnEdgeBtn.isChecked():
+            splittingLayer = 0
+            self.edgeLayer.setText(str(splittingLayer)+ " layer on edge")
+            self.cloudLayer.setText(str(15-splittingLayer)+ " layer in cloud")
+
+
+        elif self.edgeLayer is not None and self.cloudLayer is not  None:
             splittingLayer = int(str(self.splittingLayerComboBox.currentText()))
             self.edgeLayer.setText(str(splittingLayer)+ " layer on edge")
             self.cloudLayer.setText(str(15-splittingLayer)+ " layer in cloud")
@@ -122,7 +128,8 @@ class Config:
             #self.splittingCheckbox.setCheckable(False)
 
 
-        pixmap = QPixmap('input.png')
+        # pixmap = QPixmap('input.png')
+        pixmap = QPixmap("./framedata/"+str(self.detectionFile)+"/input_"+str(self.count)+".png")
         pixmap = pixmap.scaled(700, 700, Qt.KeepAspectRatio)
         self.rawImage.setPixmap(pixmap)
         #  self.predImage.load("./predictions.png")

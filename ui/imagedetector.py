@@ -140,9 +140,10 @@ def getGroups(classes):
 
 def evaluateAccuracy(record, config):
     print("eval" + str(record))
-    f = open(config.detectionFile)
+    #f = open(config.detectionFile)
+    f = open("./framedata/"+str(config.detectionFile)+"/"+str(config.count)+".json")
     lines = f.readlines()
-    ln = int(config.count / 10)
+    ln = 0
     print(ln)
     print(lines[ln])
     r2 = decode(lines[ln])
@@ -170,6 +171,10 @@ def evaluateAccuracy(record, config):
             FN = FN + count
 
     print("TP:", TP, " FP:", FP, " FN:", FN)
+
+    if TP == 0 and (FP != 0 or FN != 0):
+        config.f1 = 0
+        return
 
     if TP == 0 and (FP == 0 or FN == 0):
         config.f1 = 1
@@ -235,11 +240,18 @@ def splittingDiff(splittingLayer, config, compress=False, compressionBit="0", di
 
     if os.path.isfile("./data/edgePartition_old"):
         diffCompressEdge(edgePartitionLocation, diffTrash)
-        compressEdgePartition(compressionBit, zeroed, compressedFile)
-        config.edgeLatency = time.time() - start
-        decompressEdgePartition(compressedFile, zeroed)
-        diffDeompressEdge(zeroed)
-        copyfile(edgePartitionLocation, "./data/edgePartition_old")
+        if os.path.isfile(zeroed):
+            compressEdgePartition(compressionBit, zeroed, compressedFile)
+            config.edgeLatency = time.time() - start
+            decompressEdgePartition(compressedFile, zeroed)
+            diffDeompressEdge(zeroed)
+            copyfile(edgePartitionLocation, "./data/edgePartition_old")
+        else:
+            compressEdgePartition(compressionBit, edgePartitionLocation, compressedFile)
+            config.edgeLatency = time.time() - start
+            decompressEdgePartition(compressedFile, edgePartitionLocation)
+            copyfile(edgePartitionLocation, final)
+            copyfile(edgePartitionLocation, "./data/edgePartition_old")
 
     else:
         compressEdgePartition(compressionBit, edgePartitionLocation, compressedFile)
@@ -296,18 +308,13 @@ def createEdgePart(splittingLayer,config):
         l = line.rstrip()
         print(l)
         r = decode(str(l.decode("utf-8")))
-        #evaluateTime(r, config)
+        evaluateTime(r, config)
 
 
 def splittingDetection(splittingLayer, config, compress=False, compressionBit="0", diff=False, diffTrash = "0"):
     imagePath = "./input.png"
     edgePartitionLocation = "./data/edgePartition"
     createEdgePart(splittingLayer,config)
-    if os.path.isfile(edgePartitionLocation):
-        edgeFileSize = os.path.getsize(edgePartitionLocation)
-        inputFileSize = os.path.getsize(imagePath)
-        config.edgeFileSize = inputFileSize / edgeFileSize
-        config.setSizeField(edgeFileSize)
 
     if diff == True:
        return splittingDiff(splittingLayer,config,compress,compressionBit, diff,diffTrash)
@@ -316,13 +323,20 @@ def splittingDetection(splittingLayer, config, compress=False, compressionBit="0
         start = time.time()
         compressedFile = "./data/compressed"
         compressEdgePartition(compressionBit, edgePartitionLocation, compressedFile)
-        config.edgeLatency = time.time() - start
+        config.edgeLatency =  config.edgeLatency + time.time() - start
         decompressEdgePartition(compressedFile, edgePartitionLocation)
         edgeFileSize = os.path.getsize(compressedFile)
         config.setSizeField(edgeFileSize)
-
         inputFileSize = os.path.getsize(imagePath)
         config.edgeFileSize = inputFileSize / edgeFileSize
+    else:
+        if os.path.isfile(edgePartitionLocation):
+            edgeFileSize = os.path.getsize(edgePartitionLocation)
+        inputFileSize = os.path.getsize(imagePath)
+        config.edgeFileSize = inputFileSize / edgeFileSize
+        config.setSizeField(edgeFileSize)
+
+
 
     cloudComand = "." + cloudPath + "bin/darknet detector test ." + cloudPath + "bin/voc.names ." + cloudPath + "bin/tiny-yolo-voc.cfg ." + cloudPath + "../tiny-yolo-voc.weights " \
                                                                                                                                                         "-thresh 0.24 " + str(

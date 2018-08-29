@@ -89,13 +89,14 @@ class PlotCanvas(FigureCanvas):
 class Window2(QWidget):
     def __init__(self, *args, **kwargs):
         QWidget.__init__(self, *args, **kwargs)
+        self.setWindowTitle("Collaborative Object Detection")
 
         self.mainLayout = QVBoxLayout()
         # top
         self.mainLayout.addWidget(self.frameGroup())
 
         self.setLayout(self.mainLayout)
-        self.setFixedSize(1500, 800)
+        self.setFixedSize(1300, 700)
         self.show()
         player = videoPlayer.Player()
         player.config = config
@@ -125,8 +126,8 @@ class Window2(QWidget):
         topLayout.addLayout(frameLayout)
         areaBox = QHBoxLayout()
         b = QPlainTextEdit(self)
-        b.insertPlainText("You can write text here.\n")
-        b.setFixedSize(1000, 200)
+        #b.insertPlainText()
+        b.setFixedSize(1000, 100)
         config.resultText = b
         areaBox.addWidget(b)
         areaBox.setAlignment(Qt.AlignCenter)
@@ -161,11 +162,14 @@ class Window(QWidget):
     def __init__(self, *args, **kwargs):
         QWidget.__init__(self, *args, **kwargs)
         self.mainLayout = QVBoxLayout()
+        self.setWindowTitle("Collaborative Object Detection")
+
         # top
         self.mainLayout.addWidget(self.configGroup())
 
         self.mainLayout.addWidget(self.evaluationGroup())
-        self.mainLayout.addWidget(self.highlightGroup())
+        highlight = self.highlightGroup()
+        self.mainLayout.addWidget(highlight)
 
         self.setLayout(self.mainLayout)
         self.setFixedSize(500, 1000)
@@ -257,7 +261,7 @@ class Window(QWidget):
         vectorCompressionLayout.addWidget(QLabel("Nr of compression bits:", self))
         vectorCompressionCombobox = QComboBox()
         vectorCompressionCombobox.activated.connect(config.updateSettings)
-        for x in range(1, 30, 5):
+        for x in range(1, 30, 2):
             vectorCompressionCombobox.addItem(str(x))
 
         config.vectorCompressionCombobox = vectorCompressionCombobox

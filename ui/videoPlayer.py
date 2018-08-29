@@ -34,14 +34,16 @@ class Background(QObject):
                     vidcap = cv2.VideoCapture(file)
                     count = 0
                 success,image = vidcap.read()
-                cv2.imwrite("input.png", image)     # save frame as JPEG file
-                #self.config.updateImage()
+                if success:
+                       # save frame as JPEG file
+                    #self.config.updateImage()
 
-                # time.sleep(0.25)
-                if count % 10 == 0:
-                    self.config.count= count
-                    imagedetector.detect(self.config)
-                    self.data.emit(1)
+                    # time.sleep(0.25)
+                    if count % 10 == 0:
+                        cv2.imwrite("input.png", image)
+                        self.config.count= count
+                        imagedetector.detect(self.config)
+                        self.data.emit(1)
 
                 print("input")
                 if cv2.waitKey(10) == 27:                     # exit if Escape is hit
@@ -50,6 +52,8 @@ class Background(QObject):
                 count += 1
             else:
                 time.sleep(2)
+        print("Restart Video")
+        self.work()
 
 
 
